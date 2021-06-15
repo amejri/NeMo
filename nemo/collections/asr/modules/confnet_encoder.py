@@ -18,7 +18,7 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 
-from nemo.collections.asr.parts.submodules.Confnet_modules import ConfnetLayer
+from nemo.collections.asr.parts.submodules.confnet_modules import ConfnetLayer
 from nemo.collections.asr.parts.submodules.multi_head_attention import PositionalEncoding, RelPositionalEncoding
 from nemo.collections.asr.parts.submodules.subsampling import ConvSubsampling
 from nemo.core.classes.common import typecheck
@@ -114,15 +114,11 @@ class ConfnetEncoder(NeuralModule, Exportable):
         subsampling_factor=4,
         subsampling_conv_channels=-1,
         ff_expansion_factor=4,
-        self_attention_model='rel_pos',
         n_heads=4,
         att_context_size=None,
         xscaling=True,
-        untie_biases=True,
-        pos_emb_max_len=5000,
         conv_kernel_size=31,
         dropout=0.1,
-        dropout_emb=0.1,
         dropout_att=0.0,
     ):
         super().__init__()
@@ -157,45 +153,40 @@ class ConfnetEncoder(NeuralModule, Exportable):
             self._feat_out = d_model
             self.pre_encode = nn.Linear(feat_in, d_model)
 
-        if not untie_biases and self_attention_model == "rel_pos":
-            d_head = d_model // n_heads
-            pos_bias_u = nn.Parameter(torch.Tensor(n_heads, d_head))
-            pos_bias_v = nn.Parameter(torch.Tensor(n_heads, d_head))
-            nn.init.zeros_(pos_bias_u)
-            nn.init.zeros_(pos_bias_v)
-        else:
-            pos_bias_u = None
-            pos_bias_v = None
+        # if not untie_biases and self_attention_model == "rel_pos":
+        #     d_head = d_model // n_heads
+        #     pos_bias_u = nn.Parameter(torch.Tensor(n_heads, d_head))
+        #     pos_bias_v = nn.Parameter(torch.Tensor(n_heads, d_head))
+        #     nn.init.zeros_(pos_bias_u)
+        #     nn.init.zeros_(pos_bias_v)
+        # else:
+            # pos_bias_u = None
+            # pos_bias_v = None
 
-        if self_attention_model == "rel_pos":
-            self.pos_enc = RelPositionalEncoding(
-                d_model=d_model,
-                dropout_rate=dropout,
-                max_len=pos_emb_max_len,
-                xscale=self.xscale,
-                dropout_rate_emb=dropout_emb,
-            )
-        elif self_attention_model == "abs_pos":
-            pos_bias_u = None
-            pos_bias_v = None
-            self.pos_enc = PositionalEncoding(
-                d_model=d_model, dropout_rate=dropout, max_len=pos_emb_max_len, xscale=self.xscale
-            )
-        else:
-            raise ValueError(f"Not valid self_attention_model: '{self_attention_model}'!")
+        # if self_attention_model == "rel_pos":
+        #     self.pos_enc = RelPositionalEncoding(
+        #         d_model=d_model,
+        #         dropout_rate=dropout,
+        #         max_len=pos_emb_max_len,
+        #         xscale=self.xscale,
+        #         dropout_rate_emb=dropout_emb,
+        #     )
+        # elif self_attention_model == "abs_pos":
+        #     pos_bias_u = None
+        #     pos_bias_v = None
+        #     self.pos_enc = PositionalEncoding(
+        #         d_model=d_model, dropout_rate=dropout, max_len=pos_emb_max_len, xscale=self.xscale
+        #     )
+        # else:
+        #     raise ValueError(f"Not valid self_attention_model: '{self_attention_model}'!")
 
         self.layers = nn.ModuleList()
         for i in range(n_layers):
             layer = ConfnetLayer(
                 d_model=d_model,
                 d_ff=d_ff,
-                self_attention_model=self_attention_model,
-                n_heads=n_heads,
                 conv_kernel_size=conv_kernel_size,
-                dropout=dropout,
-                dropout_att=dropout_att,
-                pos_bias_u=pos_bias_u,
-                pos_bias_v=pos_bias_v,
+                dropout=dropout
             )
             self.layers.append(layer)
 

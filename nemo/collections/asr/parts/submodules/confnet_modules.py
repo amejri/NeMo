@@ -17,10 +17,6 @@ from torch import nn as nn
 from torch.nn import LayerNorm
 from torch.nn import functional as F
 
-from nemo.collections.asr.parts.submodules.multi_head_attention import (
-    MultiHeadAttention,
-    RelPositionMultiHeadAttention,
-)
 from nemo.collections.asr.parts.utils.activations import Swish
 
 __all__ = ['ConfnetConvolution', 'ConfnetFeedForward', 'ConfnetLayer']
@@ -42,18 +38,10 @@ class ConfnetLayer(torch.nn.Module):
         self,
         d_model,
         d_ff,
-        self_attention_model='rel_pos',
-        n_heads=4,
         conv_kernel_size=31,
-        dropout=0.1,
-        dropout_att=0.1,
-        pos_bias_u=None,
-        pos_bias_v=None,
+        dropout=0.1
     ):
         super(ConfnetLayer, self).__init__()
-
-        self.self_attention_model = self_attention_model
-        self.n_heads = n_heads
         self.fc_factor = 0.5
 
         # first feed forward module
@@ -66,17 +54,7 @@ class ConfnetLayer(torch.nn.Module):
 
         # multi-headed self-attention module
         self.norm_self_att = LayerNorm(d_model)
-        # if self_attention_model == 'rel_pos':
-        #     self.self_attn = RelPositionMultiHeadAttention(
-        #         n_head=n_heads, n_feat=d_model, dropout_rate=dropout_att, pos_bias_u=pos_bias_u, pos_bias_v=pos_bias_v
-        #     )
-        # elif self_attention_model == 'abs_pos':
-        #     self.self_attn = MultiHeadAttention(n_head=n_heads, n_feat=d_model, dropout_rate=dropout_att)
-        # else:
-        #     raise ValueError(
-        #         f"'{self_attention_model}' is not not a valid value for 'self_attention_model', "
-        #         f"valid values can be from ['rel_pos', 'abs_pos']"
-        #     )
+
         self.fnet = FNetLayer(d_model=d_model, dropout=dropout)
 
         # second feed forward module
