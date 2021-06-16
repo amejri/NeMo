@@ -89,7 +89,7 @@ class ConfnetLayer(torch.nn.Module):
         # #     x = None
         # x = self.fnet(x)
         # x = self.dropout(x) + residual
-        for _ in range(3):
+        for _ in range(4):
             residual = x
             x = self.norm_self_att(x)
             x = self.fnet(x)
