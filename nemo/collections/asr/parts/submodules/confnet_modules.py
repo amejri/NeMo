@@ -64,7 +64,7 @@ class ConfnetLayer(torch.nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.norm_out = LayerNorm(d_model)
 
-    def forward(self, x, att_mask=None, pos_emb=None, pad_mask=None):
+    def forward(self, x, pad_mask=None):
         """
         Args:
             x (torch.Tensor): input signals (B, T, d_model)
