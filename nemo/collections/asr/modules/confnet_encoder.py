@@ -114,13 +114,11 @@ class ConfnetEncoder(NeuralModule, Exportable):
         subsampling_factor=4,
         subsampling_conv_channels=-1,
         ff_expansion_factor=4,
-        n_heads=4,
         att_context_size=None,
         xscaling=True,
         conv_kernel_size=31,
-        dropout=0.1,
-        dropout_att=0.0,
-    ):
+        dropout=0.1    
+        ):
         super().__init__()
 
         d_ff = d_model * ff_expansion_factor
@@ -208,7 +206,7 @@ class ConfnetEncoder(NeuralModule, Exportable):
         else:
             audio_signal = self.pre_encode(audio_signal)
 
-        audio_signal, pos_emb = self.pos_enc(audio_signal)
+        # audio_signal, pos_emb = self.pos_enc(audio_signal)
         bs, xmax, idim = audio_signal.size()
 
         # Create the self-attention and padding masks
