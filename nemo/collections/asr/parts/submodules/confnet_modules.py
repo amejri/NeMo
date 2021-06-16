@@ -79,16 +79,21 @@ class ConfnetLayer(torch.nn.Module):
         x = self.feed_forward1(x)
         x = self.fc_factor * self.dropout(x) + residual
 
-        residual = x
-        x = self.norm_self_att(x)
-        # if self.self_attention_model == 'rel_pos':
-        #     x = self.self_attn(query=x, key=x, value=x, mask=att_mask, pos_emb=pos_emb)
-        # elif self.self_attention_model == 'abs_pos':
-        #     x = self.self_attn(query=x, key=x, value=x, mask=att_mask)
-        # else:
-        #     x = None
-        x = self.fnet(x)
-        x = self.dropout(x) + residual
+        # residual = x
+        # x = self.norm_self_att(x)
+        # # if self.self_attention_model == 'rel_pos':
+        # #     x = self.self_attn(query=x, key=x, value=x, mask=att_mask, pos_emb=pos_emb)
+        # # elif self.self_attention_model == 'abs_pos':
+        # #     x = self.self_attn(query=x, key=x, value=x, mask=att_mask)
+        # # else:
+        # #     x = None
+        # x = self.fnet(x)
+        # x = self.dropout(x) + residual
+        for _ in range(3):
+            residual = x
+            x = self.norm_self_att(x)
+            x = self.fnet(x)
+            x = self.dropout(x) + residual
 
         residual = x
         x = self.norm_conv(x)
